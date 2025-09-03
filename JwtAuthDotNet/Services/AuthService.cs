@@ -11,11 +11,11 @@ using System.Text;
 
 namespace JwtAuthDotNet.Services
 {
-    public class AuthService( UserDbContext context ,IConfiguration configuration) : IAuthService
+    public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
     {
         public async Task<TokenResponseDto?> LoginAsync(UserDto request)
         {
-            var user = await context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user is null)
             {
                 return null;
@@ -34,27 +34,33 @@ namespace JwtAuthDotNet.Services
             return new TokenResponseDto()
             {
                 AccessToken = CreateToken(user),
-                RefreshToken = await GnerateAndSaveRefreshToken(user)
+                RefreshToken = await GenerateAndSaveRefreshToken(user),
+                Role = user.Role
             };
         }
 
-        public async Task<User?> RegisterAsync(UserDto request)
+        public async Task<TokenResponseDto?> RegisterAsync(UserDto request)
         {
-            if (await context.Users.AnyAsync(u=>u.Username == request.Username))
+            if (await context.Users.AnyAsync(u => u.Email == request.Email))
             {
-                                return null;
+                return null;
             }
+
             var user = new User();
             var hashPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
+
             user.Username = request.Username;
             user.HashPassword = hashPassword;
+            user.Email = request.Email;
+            user.Phone = request.Phone;
             context.Users.Add(user);
             await context.SaveChangesAsync();
-            return user;
+
+            return await CreateTokenResponse(user);
         }
         public async Task<TokenResponseDto?> RefreshTokenAsync(RefreshTokenRequestDto request)
         {
-            var user =  await ValidateRefreshToken(request.UserId, request.RefreshToken);
+            var user = await ValidateRefreshToken(request.RefreshToken);
             if (user is null)
             {
                 return null;
@@ -62,17 +68,17 @@ namespace JwtAuthDotNet.Services
             return await CreateTokenResponse(user);
 
         }
-        private async Task<User?> ValidateRefreshToken(Guid UserId,string RefreshToken )
+        private async Task<User?> ValidateRefreshToken(string RefreshToken)
         {
-            var user = await context.Users.FindAsync(UserId);
-            if (user is null || user.RefreshToken != RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            var user = await context.Users.FirstOrDefaultAsync(u => u.RefreshToken == RefreshToken);
+            if (user is null || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 return null;
             }
             return user;
 
         }
-        private async Task<string> GnerateRefreshToken()
+        private async Task<string> GenerateRefreshToken()
         {
             string token;
             do
@@ -87,19 +93,19 @@ namespace JwtAuthDotNet.Services
             return token;
         }
 
-        private async Task<string> GnerateAndSaveRefreshToken(User user)
+        private async Task<string> GenerateAndSaveRefreshToken(User user)
         {
-            var refreshToken = await GnerateRefreshToken();
+            var refreshToken = await GenerateRefreshToken();
             user.RefreshToken = refreshToken;
             user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
             await context.SaveChangesAsync();
             return refreshToken;
-        } 
+        }
         private string CreateToken(User user)
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name,user.Username),
+                new Claim(ClaimTypes.Name,user.Email),
                 new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
                 new Claim(ClaimTypes.Role,user.Role)
             };

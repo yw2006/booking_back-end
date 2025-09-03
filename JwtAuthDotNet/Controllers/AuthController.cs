@@ -19,15 +19,16 @@ namespace JwtAuthDotNet.Controllers
         public static User user = new();
 
         [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto request)
+        public async Task<ActionResult<TokenResponseDto>> Register(UserDto request)
         {
-            var user = await authService.RegisterAsync(request);
-            if (user is null)
+            var result = await authService.RegisterAsync(request);
+            if (result is null)
             {
                 return BadRequest("User already exists");
             }
-            return Ok(user);
+            return Ok(result);
         }
+
         [HttpPost("login")]
         public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
         {
@@ -63,6 +64,5 @@ namespace JwtAuthDotNet.Controllers
         {
             return Ok($"okay your Admin 👍");
         }
-
     }
 }
