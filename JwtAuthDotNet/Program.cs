@@ -1,5 +1,6 @@
 using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Services;
+using JwtAuthDotNet.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -17,6 +18,7 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 }
     );
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<UserController>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     options.TokenValidationParameters = new TokenValidationParameters
