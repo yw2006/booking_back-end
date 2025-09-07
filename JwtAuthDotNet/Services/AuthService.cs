@@ -120,7 +120,5 @@ namespace JwtAuthDotNet.Services
                 signingCredentials: creds);
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-
-
     }
 }
