@@ -3,10 +3,12 @@ using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models.Hotel;
 using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using FileTypeChecker;
 
 namespace JwtAuthDotNet.Services.Implementations
 {
-    public class HotelService(UserDbContext context) : IHotelService
+    public class HotelService(UserDbContext context, IWebHostEnvironment env, IHttpContextAccessor httpContextAccessor)
+        : IHotelService
     {
         public async Task<List<HotelDto>> GetHotels()
         {
@@ -47,7 +49,7 @@ namespace JwtAuthDotNet.Services.Implementations
             };
         }
 
-        public async Task<bool> CreateHotel(CreateHotelDto dto)
+        public async Task<bool> CreateHotel(CreateHotelDto dto, IFormFile? file)
         {
             Hotel hotel = new Hotel
             {
@@ -55,15 +57,22 @@ namespace JwtAuthDotNet.Services.Implementations
                 City = dto.City,
                 Address = dto.Address,
                 Description = dto.Description,
-                ThumbnailUrl = dto.ThumbnailUrl,
             };
+
+            if (file is not null)
+            {
+                var request = httpContextAccessor.HttpContext?.Request;
+                var baseUrl = $"{request?.Scheme}://{request?.Host}";
+
+                hotel.ThumbnailUrl = await MakeImageURL(file, baseUrl);
+            }
 
             context.Hotels.Add(hotel);
             await context.SaveChangesAsync();
             return true;
         }
 
-        public async Task<bool> UpdateHotel(int id, UpdateHotelDto dto)
+        public async Task<bool> UpdateHotel(int id, UpdateHotelDto dto, IFormFile? file)
         {
             Hotel? hotel = await context.Hotels.FindAsync(id);
 
@@ -76,11 +85,19 @@ namespace JwtAuthDotNet.Services.Implementations
             hotel.City = dto.City;
             hotel.Address = dto.Address;
             hotel.Description = dto.Description;
-            hotel.ThumbnailUrl = dto.ThumbnailUrl;
+
+            if (file is not null)
+            {
+                var request = httpContextAccessor.HttpContext?.Request;
+                var baseUrl = $"{request?.Scheme}://{request?.Host}";
+
+                hotel.ThumbnailUrl = await MakeImageURL(file, baseUrl);
+            }
 
             await context.SaveChangesAsync();
             return true;
         }
+
         public async Task<bool> DeleteHotel(int id)
         {
             Hotel? hotel = await context.Hotels.FindAsync(id);
@@ -94,6 +111,43 @@ namespace JwtAuthDotNet.Services.Implementations
 
             await context.SaveChangesAsync();
             return true;
+        }
+
+        private async Task<string?> MakeImageURL(IFormFile file, string baseURL)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return null;
+            }
+
+            using (var stream = file.OpenReadStream())
+            {
+                if (!FileTypeValidator.IsImage(stream))
+                {
+                    return null;
+                }
+            }
+
+            string fileName;
+            string filePath;
+
+            do
+            {
+                fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+                filePath = Path.Combine(env.WebRootPath, "images", fileName);
+
+            } while (System.IO.File.Exists(filePath));
+
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(fileStream);
+            }
+
+            var fileUrl = $"{baseURL}/images/{fileName}";
+
+            return fileUrl;
         }
     }
 }

@@ -32,9 +32,9 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
     }
 
     [HttpPost("admin")]
-    public async Task<IActionResult> AddHotel(CreateHotelDto dto)
+    public async Task<IActionResult> AddHotel(CreateHotelDto dto, IFormFile? file)
     {
-        bool wasSuccessful = await hotelService.CreateHotel(dto);
+        bool wasSuccessful = await hotelService.CreateHotel(dto, file);
         if (!wasSuccessful)
         {
             return StatusCode(500, "Failed to create hotel");
@@ -44,9 +44,9 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
     }
 
     [HttpPut("admin/{id:int}")]
-    public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto)
+    public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto, IFormFile? file)
     {
-        bool wasSuccessful = await hotelService.UpdateHotel(id, dto);
+        bool wasSuccessful = await hotelService.UpdateHotel(id, dto, file);
         if (!wasSuccessful)
         {
             return NotFound("User with this Id was not found.");
