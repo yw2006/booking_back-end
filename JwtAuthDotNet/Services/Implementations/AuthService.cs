@@ -1,6 +1,7 @@
 ﻿using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models;
+using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -9,7 +10,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace JwtAuthDotNet.Services
+namespace JwtAuthDotNet.Services.Implementations
 {
     public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
     {

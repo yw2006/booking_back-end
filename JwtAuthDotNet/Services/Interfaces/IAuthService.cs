@@ -1,7 +1,6 @@
-﻿using JwtAuthDotNet.Entities;
-using JwtAuthDotNet.Models;
+﻿using JwtAuthDotNet.Models;
 
-namespace JwtAuthDotNet.Services
+namespace JwtAuthDotNet.Services.Interfaces
 {
     public interface IAuthService
     {

@@ -1,5 +1,6 @@
 using JwtAuthDotNet.Data;
-using JwtAuthDotNet.Services;
+using JwtAuthDotNet.Services.Interfaces;
+using JwtAuthDotNet.Services.Implementations;
 using JwtAuthDotNet.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

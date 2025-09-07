@@ -1,3 +1,4 @@
+using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -6,41 +7,42 @@ namespace JwtAuthDotNet.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class HotelsController() : ControllerBase
+public class HotelsController(IHotelService IHotelService) : ControllerBase
 {
     [AllowAnonymous]
     [HttpGet]
-    public IActionResult GetHotels()
+    public async Task<IActionResult> GetHotels()
     {
+        await Task.CompletedTask; // replace with: await _hotelService.GetHotelsAsync();
         return Ok();
     }
 
     [AllowAnonymous]
-    [HttpGet]
-    [Route("{id:int}")]
-    public IActionResult GetHotel(int id)
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetHotel(int id)
     {
+        await Task.CompletedTask; // replace with: await _hotelService.GetHotelByIdAsync(id);
         return Ok();
     }
 
-    [HttpPost]
-    [Route("admin")]
-    public IActionResult AddHotel()
+    [HttpPost("admin")]
+    public async Task<IActionResult> AddHotel()
     {
+        await Task.CompletedTask; // replace with: await _hotelService.AddHotelAsync(model);
         return Ok();
     }
 
-    [HttpPut]
-    [Route("admin/{id:int}")]
-    public IActionResult UpdateHotel(int id)
+    [HttpPut("admin/{id:int}")]
+    public async Task<IActionResult> UpdateHotel(int id)
     {
+        await Task.CompletedTask; // replace with: await _hotelService.UpdateHotelAsync(id, model);
         return Ok();
     }
 
-    [HttpDelete]
-    [Route("admin/{id:int}")]
-    public IActionResult DeleteHotel(int id)
+    [HttpDelete("admin/{id:int}")]
+    public async Task<IActionResult> DeleteHotel(int id)
     {
+        await Task.CompletedTask; // replace with: await _hotelService.DeleteHotelAsync(id);
         return Ok();
     }
 }

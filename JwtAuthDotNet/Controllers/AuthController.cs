@@ -1,6 +1,6 @@
 ﻿using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models;
-using JwtAuthDotNet.Services;
+using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +16,7 @@ namespace JwtAuthDotNet.Controllers
     [ApiController]
     public class AuthController(IAuthService authService) : ControllerBase
     {
-        public static User user = new();
+        public User user = new();
 
         [HttpPost("register")]
         public async Task<ActionResult<TokenResponseDto>> Register(UserDto request)
