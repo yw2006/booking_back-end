@@ -9,6 +9,5 @@ namespace JwtAuthDotNet.Models.Hotel
         public string? Description { get; set; }
         public string? ThumbnailUrl { get; set; }
     }
-
 }
 
