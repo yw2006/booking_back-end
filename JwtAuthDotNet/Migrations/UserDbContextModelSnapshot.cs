@@ -226,7 +226,7 @@ namespace JwtAuthDotNet.Migrations
                     b.HasOne("JwtAuthDotNet.Entities.Room", "Room")
                         .WithMany("Bookings")
                         .HasForeignKey("RoomId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("JwtAuthDotNet.Entities.User", "User")
