@@ -21,7 +21,7 @@ namespace JwtAuthDotNet.Entities
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation
-        public ICollection<Room> RoomTypes { get; set; } = new List<Room>();
+        public ICollection<Room> Rooms { get; set; } = new List<Room>();
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
