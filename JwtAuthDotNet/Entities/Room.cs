@@ -15,7 +15,7 @@ namespace JwtAuthDotNet.Entities
         [Required]
         public RoomTypeName Name { get; set; }
 
-        [NotMapped] 
+        [NotMapped]
         public int Capacity => Name switch
         {
             RoomTypeName.Deluxe => 2,
@@ -28,7 +28,6 @@ namespace JwtAuthDotNet.Entities
         };
         [Column(TypeName = "decimal(18,2)")]
         public decimal BasePrice { get; set; }
-        public DateTime Date { get; set; }
         public string? Description { get; set; }
 
         public bool IsAvailable { get; set; } = true;

@@ -8,8 +8,7 @@ namespace JwtAuthDotNet.Controllers;
 [ApiController]
 public class UserController(UserDbContext context) : ControllerBase
 {
-
-    [AllowAnonymous]
+    [Authorize(Roles = "Admin")]
     [HttpGet("allusers")]
     public IActionResult GetAllUsers()
     {

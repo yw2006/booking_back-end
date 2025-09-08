@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace JwtAuthDotNet.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 [ApiController]
 public class HotelsController(IHotelService hotelService) : ControllerBase

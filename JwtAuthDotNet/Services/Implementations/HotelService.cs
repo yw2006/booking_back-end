@@ -1,10 +1,10 @@
 using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models.Hotel;
+using JwtAuthDotNet.Models.Room;
 using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using FileTypeChecker;
-using Microsoft.AspNetCore.Mvc;
 
 namespace JwtAuthDotNet.Services.Implementations
 {
@@ -13,25 +13,58 @@ namespace JwtAuthDotNet.Services.Implementations
     {
         public async Task<List<HotelDto>> GetHotels()
         {
-            List<HotelDto> hotels = await context.Hotels.Select(h => new HotelDto
-            {
-                Id = h.Id,
-                Name = h.Name,
-                City = h.City,
-                Address = h.Address,
-                Description = h.Description,
-                ThumbnailUrl = h.ThumbnailUrl,
-                CreatedAt = h.CreatedAt
+            List<HotelDto> hotels = await context.Hotels
+                    .Select(h => new HotelDto
+                    {
+                        Id = h.Id,
+                        Name = h.Name,
+                        City = h.City,
+                        Address = h.Address,
+                        Description = h.Description,
+                        ThumbnailUrl = h.ThumbnailUrl,
+                        CreatedAt = h.CreatedAt,
+                        Rooms = h.Rooms.Select(r => new RoomDto
+                        {
+                            Id = r.Id,
+                            HotelId = r.HotelId,
+                            Name = r.Name,
+                            BasePrice = r.BasePrice,
+                            Description = r.Description,
+                            IsAvailable = r.IsAvailable,
+                            CreatedAt = r.CreatedAt,
+                            UpdatedAt = r.UpdatedAt
 
-            }).ToListAsync();
-
+                        }).ToList()
+                    }).ToListAsync();
 
             return hotels;
 
         }
+
         public async Task<HotelDto?> GetHotel(Guid id)
         {
-            Hotel? h = await context.Hotels.FindAsync(id);
+            Hotel? h = await context.Hotels
+                    .Include(h => h.Rooms)
+                    .Include(h => h.Bookings)
+                    .Include(h => h.Reviews)
+                    .FirstOrDefaultAsync(h => h.Id == id);
+            List<RoomDto> rooms = new List<RoomDto>();
+
+            foreach (Room? room in h.Rooms)
+            {
+                rooms.Add(new RoomDto
+                {
+                    Id = room.Id,
+                    HotelId = room.HotelId,
+                    Name = room.Name,
+                    BasePrice = room.BasePrice,
+                    Description = room.Description,
+                    IsAvailable = room.IsAvailable,
+                    CreatedAt = room.CreatedAt,
+                    UpdatedAt = room.UpdatedAt
+
+                });
+            }
 
             if (h is null)
             {
@@ -46,13 +79,14 @@ namespace JwtAuthDotNet.Services.Implementations
                 Address = h.Address,
                 Description = h.Description,
                 ThumbnailUrl = h.ThumbnailUrl,
-                CreatedAt = h.CreatedAt
+                CreatedAt = h.CreatedAt,
+                Rooms = rooms
+
             };
         }
 
         public async Task<bool> CreateHotel(CreateHotelDto dto)
         {
-
             Hotel hotel = new Hotel
             {
                 Name = dto.Name,
@@ -84,9 +118,9 @@ namespace JwtAuthDotNet.Services.Implementations
             }
 
             hotel.Name = string.IsNullOrWhiteSpace(dto.Name) ? hotel.Name : dto.Name;
-            hotel.City = string.IsNullOrWhiteSpace(dto.City) ? hotel.City : dto.City;
-            hotel.Address = string.IsNullOrWhiteSpace(dto.Address) ? hotel.Address : dto.Address;
-            hotel.Description = string.IsNullOrWhiteSpace(dto.Description) ? hotel.Description : dto.Description;
+            if (dto.City != null) hotel.City = dto.City;
+            if (dto.Address != null) hotel.Address = dto.Address;
+            if (dto.Description != null) hotel.Description = dto.Description;
 
             if (dto.Image is not null)
             {
