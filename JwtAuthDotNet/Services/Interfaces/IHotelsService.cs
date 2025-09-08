@@ -7,10 +7,10 @@ namespace JwtAuthDotNet.Services.Interfaces
     public interface IHotelService
     {
         Task<List<HotelDto>> GetHotels();
-        Task<HotelDto?> GetHotel(int id);
-        Task<bool> CreateHotel(CreateHotelDto dto, IFormFile? file);
-        Task<bool> UpdateHotel(int id, UpdateHotelDto dto, IFormFile? file);
-        Task<bool> DeleteHotel(int id);
+        Task<HotelDto?> GetHotel(Guid id);
+        Task<bool> CreateHotel(CreateHotelDto dto);
+        Task<bool> UpdateHotel(Guid id, UpdateHotelDto dto);
+        Task<bool> DeleteHotel(Guid id);
 
     }
 }

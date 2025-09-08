@@ -19,8 +19,8 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetHotel(int id)
+    [HttpGet("{id:Guid}")]
+    public async Task<IActionResult> GetHotel(Guid id)
     {
         HotelDto? hotel = await hotelService.GetHotel(id);
         if (hotel is null)
@@ -32,21 +32,27 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
     }
 
     [HttpPost("admin")]
-    public async Task<IActionResult> AddHotel(CreateHotelDto dto, IFormFile? file)
+    public async Task<IActionResult> AddHotel([FromForm] CreateHotelDto dto)
     {
-        bool wasSuccessful = await hotelService.CreateHotel(dto, file);
+        bool wasSuccessful = await hotelService.CreateHotel(dto);
+
         if (!wasSuccessful)
         {
             return StatusCode(500, "Failed to create hotel");
         }
 
+        if (dto.Image == null || dto.Image.Length == 0)
+        {
+            return BadRequest();
+        }
+
         return Ok();
     }
 
-    [HttpPut("admin/{id:int}")]
-    public async Task<IActionResult> UpdateHotel(int id, UpdateHotelDto dto, IFormFile? file)
+    [HttpPut("admin/{id:Guid}")]
+    public async Task<IActionResult> UpdateHotel(Guid id, UpdateHotelDto dto)
     {
-        bool wasSuccessful = await hotelService.UpdateHotel(id, dto, file);
+        bool wasSuccessful = await hotelService.UpdateHotel(id, dto);
         if (!wasSuccessful)
         {
             return NotFound("User with this Id was not found.");
@@ -55,8 +61,8 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
         return Ok();
     }
 
-    [HttpDelete("admin/{id:int}")]
-    public async Task<IActionResult> DeleteHotel(int id)
+    [HttpDelete("admin/{id:Guid}")]
+    public async Task<IActionResult> DeleteHotel(Guid id)
     {
         bool wasSuccessful = await hotelService.DeleteHotel(id);
         if (!wasSuccessful)

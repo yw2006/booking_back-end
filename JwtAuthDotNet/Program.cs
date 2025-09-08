@@ -39,8 +39,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 builder.Configuration.GetValue<string>("AppSettings:token")!)),
         ValidateIssuerSigningKey = true,
 
-    }
-    );
+    });
+
 var app = builder.Build();
 
 app.UseStaticFiles(new StaticFileOptions

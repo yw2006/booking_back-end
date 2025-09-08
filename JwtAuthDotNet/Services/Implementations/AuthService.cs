@@ -55,6 +55,8 @@ namespace JwtAuthDotNet.Services.Implementations
             user.HashPassword = hashPassword;
             user.Email = request.Email;
             user.Phone = request.Phone;
+            user.Role = "User";
+
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
@@ -111,6 +113,7 @@ namespace JwtAuthDotNet.Services.Implementations
                 new Claim(ClaimTypes.NameIdentifier,user.Id.ToString()),
                 new Claim(ClaimTypes.Role,user.Role)
             };
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(configuration.GetValue<string>("AppSettings:token")!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
