@@ -1,7 +1,6 @@
 ﻿using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models;
-using JwtAuthDotNet.Models.User;
 using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,7 @@ namespace JwtAuthDotNet.Services.Implementations
 {
     public class AuthService(UserDbContext context, IConfiguration configuration) : IAuthService
     {
-        public async Task<TokenResponseDto?> LoginAsync(LoginUserDto request)
+        public async Task<TokenResponseDto?> LoginAsync(UserDto request)
         {
             var user = await context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
 

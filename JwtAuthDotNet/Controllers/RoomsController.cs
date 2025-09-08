@@ -5,14 +5,12 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace JwtAuthDotNet.Controllers;
 
-// [Authorize(Roles = "Admin")]
-[AllowAnonymous]
+[Authorize(Roles = "Admin")]
 [Route("api/[controller]")]
 [ApiController]
 public class RoomsController(IRoomService roomService) : ControllerBase
 {
     [AllowAnonymous]
-    [HttpGet]
     public async Task<IActionResult> GetRooms()
     {
         var rooms = await roomService.GetRooms();

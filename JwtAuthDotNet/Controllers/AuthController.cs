@@ -1,14 +1,9 @@
 ﻿using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models;
+using JwtAuthDotNet.Models.User;
 using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace JwtAuthDotNet.Controllers
 {
@@ -30,7 +25,7 @@ namespace JwtAuthDotNet.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
+        public async Task<ActionResult<TokenResponseDto>> Login(LoginUserDto request)
         {
             var result = await authService.LoginAsync(request);
             if (result is null)
@@ -63,6 +58,19 @@ namespace JwtAuthDotNet.Controllers
         public IActionResult AdminOnlyEndPoints()
         {
             return Ok($"okay your Admin 👍");
+        }
+
+        // [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
+        [HttpPost("admin/create-admin")]
+        public async Task<IActionResult> CreateAdmin(UserDto request)
+        {
+            bool result = await authService.CreateAdmin(request);
+            if (!result)
+            {
+                return BadRequest("User already exists");
+            }
+            return Ok(result);
         }
     }
 }
