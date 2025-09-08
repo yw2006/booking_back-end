@@ -11,6 +11,7 @@ namespace JwtAuthDotNet.Controllers;
 public class RoomsController(IRoomService roomService) : ControllerBase
 {
     [AllowAnonymous]
+    [HttpGet]
     public async Task<IActionResult> GetRooms()
     {
         var rooms = await roomService.GetRooms();

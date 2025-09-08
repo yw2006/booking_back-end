@@ -60,8 +60,7 @@ namespace JwtAuthDotNet.Controllers
             return Ok($"okay your Admin 👍");
         }
 
-        // [Authorize(Roles = "Admin")]
-        [AllowAnonymous]
+        [Authorize(Roles = "Admin")]
         [HttpPost("admin/create-admin")]
         public async Task<IActionResult> CreateAdmin(UserDto request)
         {
