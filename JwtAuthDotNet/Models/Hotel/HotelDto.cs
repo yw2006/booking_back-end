@@ -11,6 +11,8 @@ namespace JwtAuthDotNet.Models.Hotel
         public string? Description { get; set; }
         public string? ThumbnailUrl { get; set; }
         public DateTime CreatedAt { get; set; }
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
         public ICollection<RoomDto> Rooms { get; set; } = new List<RoomDto>();
 
     }

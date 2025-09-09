@@ -14,62 +14,60 @@ namespace JwtAuthDotNet.Services.Implementations
         public async Task<List<HotelDto>> GetHotels()
         {
             List<HotelDto> hotels = await context.Hotels
-                    .Select(h => new HotelDto
-                    {
-                        Id = h.Id,
-                        Name = h.Name,
-                        City = h.City,
-                        Address = h.Address,
-                        Description = h.Description,
-                        ThumbnailUrl = h.ThumbnailUrl,
-                        CreatedAt = h.CreatedAt,
-                        Rooms = h.Rooms.Select(r => new RoomDto
-                        {
-                            Id = r.Id,
-                            HotelId = r.HotelId,
-                            Name = r.Name,
-                            BasePrice = r.BasePrice,
-                            Description = r.Description,
-                            IsAvailable = r.IsAvailable,
-                            CreatedAt = r.CreatedAt,
-                            UpdatedAt = r.UpdatedAt
+                .Select(h => new HotelDto
+                {
+                    Id = h.Id,
+                    Name = h.Name,
+                    City = h.City,
+                    Address = h.Address,
+                    Description = h.Description,
+                    ThumbnailUrl = h.ThumbnailUrl,
+                    CreatedAt = h.CreatedAt,
+                    // Compute average + count directly in projection
+                    AverageRating = h.Reviews.Any() ? h.Reviews.Average(r => r.Rating) : 0,
+                    ReviewCount = h.Reviews.Count,
 
-                        }).ToList()
-                    }).ToListAsync();
+                    Rooms = h.Rooms.Select(r => new RoomDto
+                    {
+                        Id = r.Id,
+                        HotelId = r.HotelId,
+                        Name = r.Name,
+                        BasePrice = r.BasePrice,
+                        Description = r.Description,
+                        IsAvailable = r.IsAvailable,
+                        CreatedAt = r.CreatedAt,
+                        UpdatedAt = r.UpdatedAt
+                    }).ToList()
+                })
+                .ToListAsync();
 
             return hotels;
-
         }
 
         public async Task<HotelDto?> GetHotel(Guid id)
         {
             Hotel? h = await context.Hotels
-                    .Include(h => h.Rooms)
-                    .Include(h => h.Bookings)
-                    .Include(h => h.Reviews)
-                    .FirstOrDefaultAsync(h => h.Id == id);
-            List<RoomDto> rooms = new List<RoomDto>();
-
-            foreach (Room? room in h.Rooms)
-            {
-                rooms.Add(new RoomDto
-                {
-                    Id = room.Id,
-                    HotelId = room.HotelId,
-                    Name = room.Name,
-                    BasePrice = room.BasePrice,
-                    Description = room.Description,
-                    IsAvailable = room.IsAvailable,
-                    CreatedAt = room.CreatedAt,
-                    UpdatedAt = room.UpdatedAt
-
-                });
-            }
+                .Include(h => h.Rooms)
+                .Include(h => h.Bookings)
+                .Include(h => h.Reviews)
+                .FirstOrDefaultAsync(h => h.Id == id);
 
             if (h is null)
             {
                 return null;
             }
+
+            List<RoomDto> rooms = h.Rooms.Select(room => new RoomDto
+            {
+                Id = room.Id,
+                HotelId = room.HotelId,
+                Name = room.Name,
+                BasePrice = room.BasePrice,
+                Description = room.Description,
+                IsAvailable = room.IsAvailable,
+                CreatedAt = room.CreatedAt,
+                UpdatedAt = room.UpdatedAt
+            }).ToList();
 
             return new HotelDto
             {
@@ -80,11 +78,13 @@ namespace JwtAuthDotNet.Services.Implementations
                 Description = h.Description,
                 ThumbnailUrl = h.ThumbnailUrl,
                 CreatedAt = h.CreatedAt,
-                Rooms = rooms
+                Rooms = rooms,
 
+                // New fields
+                AverageRating = h.Reviews.Any() ? h.Reviews.Average(r => r.Rating) : 0,
+                ReviewCount = h.Reviews.Count
             };
         }
-
         public async Task<bool> CreateHotel(CreateHotelDto dto)
         {
             Hotel hotel = new Hotel

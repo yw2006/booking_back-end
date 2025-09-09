@@ -14,7 +14,7 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetHotels()
     {
-        var hotels = await hotelService.GetHotels();
+        List<HotelDto> hotels = await hotelService.GetHotels();
         return Ok(hotels);
     }
 

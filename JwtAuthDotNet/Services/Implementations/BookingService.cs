@@ -175,7 +175,7 @@ namespace JwtAuthDotNet.Services.Implementations
             return start1 < end2 && end1 > start2;
         }
 
-        
+
 
         public async Task<IEnumerable<BookingDto>> GetBookingsByStatusAsync(string status)
         {
@@ -183,7 +183,7 @@ namespace JwtAuthDotNet.Services.Implementations
                 return Enumerable.Empty<BookingDto>();
 
             return await context.Bookings
-                .Where(b => b.Status == parsedStatus).Include(b=>b.Room)
+                .Where(b => b.Status == parsedStatus).Include(b => b.Room)
                 .Select(b => new BookingDto
                 {
                     Id = b.Id,
@@ -225,6 +225,7 @@ namespace JwtAuthDotNet.Services.Implementations
                 {
                     Id = b.Id,
                     UserId = b.UserId,
+                    HotelId = b.Room.HotelId,
                     RoomId = b.RoomId,
                     CheckIn = b.CheckIn,
                     CheckOut = b.CheckOut,
@@ -238,7 +239,7 @@ namespace JwtAuthDotNet.Services.Implementations
                         Name = b.Room.Hotel.Name,
                         Address = b.Room.Hotel.Address,
                         City = b.Room.Hotel.City,
-                        ThumbnailUrl= b.Room.Hotel.ThumbnailUrl,
+                        ThumbnailUrl = b.Room.Hotel.ThumbnailUrl,
                         Description = b.Room.Hotel.Description,
                         CreatedAt = b.Room.Hotel.CreatedAt
                     },
