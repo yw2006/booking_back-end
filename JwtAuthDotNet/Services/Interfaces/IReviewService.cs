@@ -4,10 +4,10 @@ namespace JwtAuthDotNet.Services.Interfaces
 {
     public interface IReviewsService
     {
-        Task<List<ReviewDto>> GetReviews();
+        Task<List<ReviewDto>> GetHotelReviews(Guid hotelId);
         Task<ReviewDto?> GetReview(Guid id);
-        Task<bool> CreateReview(CreateReviewDto dto);
-        Task<bool> UpdateReview(Guid id, UpdateReviewDto dto);
-        Task<bool> DeleteReview(Guid id);
+        Task<(bool Success, string Message, Guid? ReviewId)> CreateReview(CreateReviewDto dto, Guid userId, Guid hotelId);
+        Task<(bool Success, string Message)> UpdateReview(Guid reviewid, UpdateReviewDto dto, Guid userId);
+        Task<(bool Success, string Message)> DeleteReview(Guid reviewid, Guid userId);
     }
 }

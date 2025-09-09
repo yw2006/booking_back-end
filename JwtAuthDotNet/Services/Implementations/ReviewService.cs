@@ -1,3 +1,4 @@
+
 using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Entities;
 using JwtAuthDotNet.Models.Review;
@@ -8,9 +9,10 @@ namespace JwtAuthDotNet.Services.Implementations
 {
     public class ReviewService(UserDbContext context) : IReviewsService
     {
-        public async Task<List<ReviewDto>> GetReviews()
+        public async Task<List<ReviewDto>> GetHotelReviews(Guid hotelId)
         {
             return await context.Reviews
+                .Where(r => r.HotelId == hotelId)
                 .Select(r => new ReviewDto
                 {
                     Id = r.Id,
@@ -24,9 +26,9 @@ namespace JwtAuthDotNet.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<ReviewDto?> GetReview(Guid id)
+        public async Task<ReviewDto?> GetReview(Guid reviewid)
         {
-            var review = await context.Reviews.FindAsync(id);
+            var review = await context.Reviews.FindAsync(reviewid);
             if (review is null) return null;
 
             return new ReviewDto
@@ -41,55 +43,74 @@ namespace JwtAuthDotNet.Services.Implementations
             };
         }
 
-        public async Task<bool> CreateReview(CreateReviewDto dto)
+        public async Task<(bool Success, string Message, Guid? ReviewId)> CreateReview(CreateReviewDto dto, Guid userId, Guid hotelId)
         {
+            if (dto.Rating < 1 || dto.Rating > 5)
+            {
+                return (false, "Rating must be between 1 and 5.", null);
+            }
+
+            var hasBooked = await context.Bookings.AnyAsync(b => b.UserId == userId && b.Room.HotelId == hotelId && b.Status == Enums.BookingStatus.Completed);
+
+            if (!hasBooked)
+            {
+                return (false, "You have not booked this hotel before or your booking is not completed.", null);
+            }
+
             var review = new Review
             {
-                UserId = dto.UserId,
-                HotelId = dto.HotelId,
+                UserId = userId,
+                HotelId = hotelId,
                 Rating = dto.Rating,
                 Comment = dto.Comment,
             };
 
             context.Reviews.Add(review);
             await context.SaveChangesAsync();
-            return true;
+            return (true, "Review created successfully.", review.Id);
         }
 
-        public async Task<bool> UpdateReview(Guid id, UpdateReviewDto dto)
+        public async Task<(bool Success, string Message)> UpdateReview(Guid reviewid, UpdateReviewDto dto, Guid userId)
         {
-            var review = await context.Reviews.FindAsync(id);
-            if (review is null) return false;
+            var review = await context.Reviews.FindAsync(reviewid);
+            if (review is null) return (false, "Review not found.");
 
-            if (dto.UserId.HasValue)
-                review.UserId = dto.UserId.Value;
-
-            if (dto.HotelId.HasValue)
-                review.HotelId = dto.HotelId.Value;
+            if (review.UserId != userId)
+            {
+                return (false, "You are not authorized to update this review.");
+            }
 
             if (dto.Rating.HasValue)
+            {
+                if (dto.Rating.Value < 1 || dto.Rating.Value > 5)
+                {
+                    return (false, "Rating must be between 1 and 5.");
+                }
                 review.Rating = dto.Rating.Value;
+            }
 
-            if (dto.Comment != null)
+            if (string.IsNullOrWhiteSpace(dto.Comment))
                 review.Comment = dto.Comment;
 
-            if (dto.CreatedAt.HasValue)
-                review.CreatedAt = dto.CreatedAt.Value;
-
-            review.UpdatedAt = DateTime.UtcNow;
+            review.UpdatedAt = System.DateTime.UtcNow;
 
             await context.SaveChangesAsync();
-            return true;
+            return (true, "Review updated successfully.");
         }
 
-        public async Task<bool> DeleteReview(Guid id)
+        public async Task<(bool Success, string Message)> DeleteReview(Guid reviewid, Guid userId)
         {
-            var review = await context.Reviews.FindAsync(id);
-            if (review is null) return false;
+            var review = await context.Reviews.FindAsync(reviewid);
+            if (review is null) return (false, "Review not found.");
+
+            if (review.UserId != userId)
+            {
+                return (false, "You are not authorized to delete this review.");
+            }
 
             context.Reviews.Remove(review);
             await context.SaveChangesAsync();
-            return true;
+            return (true, "Review deleted successfully.");
         }
     }
 }

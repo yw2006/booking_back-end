@@ -1,9 +1,7 @@
 ﻿using JwtAuthDotNet.Enums;
 using JwtAuthDotNet.Models.Booking;
-using JwtAuthDotNet.Services.Implementations;
 using JwtAuthDotNet.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using JwtAuthDotNet.utils;
@@ -14,7 +12,7 @@ namespace JwtAuthDotNet.Controllers
     public class BookingController(IBookingService bookingService) : ControllerBase
     {
         [HttpPost("booking")]
-        public async Task<IActionResult> CreateBooking([FromBody]  CreateBookingDto request)
+        public async Task<IActionResult> CreateBooking([FromBody] CreateBookingDto request)
         {
             // Get user ID from JWT token
             var userId = GetUserIdFromToken.ExtractUserId(HttpContext);
@@ -41,8 +39,6 @@ namespace JwtAuthDotNet.Controllers
             });
         }
 
-      
-
         [Authorize]
         [HttpGet("me/bookings")]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetMyBookings()
@@ -61,12 +57,11 @@ namespace JwtAuthDotNet.Controllers
             return Ok(bookings);
         }
 
-
         [Authorize]
-        [HttpPatch("bookings/{id}/cancel")]
-        public async Task<ActionResult> CancelBooking(Guid id)
+        [HttpPatch("bookings/{bookingid}/cancel")]
+        public async Task<ActionResult> CancelBooking(Guid bookingid)
         {
-            var result = await bookingService.UpdateBookingStatusAsync(id,BookingStatus.Cancelled);
+            var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Cancelled);
 
             if (!result)
                 return BadRequest("Failed to cancel booking.");
@@ -74,7 +69,6 @@ namespace JwtAuthDotNet.Controllers
             return Ok("Booking cancelled successfully.");
         }
 
-       
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/bookings")]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetPendingBookings([FromQuery] string status = "PENDING")
@@ -83,12 +77,11 @@ namespace JwtAuthDotNet.Controllers
             return Ok(bookings);
         }
 
-  
         [Authorize(Roles = "Admin")]
-        [HttpPatch("admin/bookings/{id}/confirm")]
-        public async Task<ActionResult> ConfirmBooking(Guid id)
+        [HttpPatch("admin/bookings/{bookingid}/confirm")]
+        public async Task<ActionResult> ConfirmBooking(Guid bookingid)
         {
-            var result = await bookingService.UpdateBookingStatusAsync(id, BookingStatus.Confirmed);
+            var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Confirmed);
 
             if (!result)
                 return BadRequest("Failed to confirm booking.");
@@ -96,12 +89,11 @@ namespace JwtAuthDotNet.Controllers
             return Ok("Booking confirmed successfully.");
         }
 
-        
         [Authorize(Roles = "Admin")]
-        [HttpPatch("admin/bookings/{id}/reject")]
-        public async Task<ActionResult> RejectBooking(Guid id)
+        [HttpPatch("admin/bookings/{bookingid}/reject")]
+        public async Task<ActionResult> RejectBooking(Guid bookingid)
         {
-            var result = await bookingService.UpdateBookingStatusAsync(id, BookingStatus.Rejected);
+            var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Rejected);
 
             if (!result)
                 return BadRequest("Failed to reject booking.");
@@ -110,17 +102,15 @@ namespace JwtAuthDotNet.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        [HttpPatch("admin/bookings/{id}/complete")]
-        public async Task<ActionResult> CompleteBooking(Guid id)
+        [HttpPatch("admin/bookings/{bookingid}/complete")]
+        public async Task<ActionResult> CompleteBooking(Guid bookingid)
         {
-            var result = await bookingService.UpdateBookingStatusAsync(id, BookingStatus.Completed);
+            var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Completed);
 
             if (!result)
                 return BadRequest("Failed to complete booking.");
 
             return Ok("Booking completed successfully.");
         }
-       
     }
-
 }
