@@ -17,7 +17,7 @@ namespace JwtAuthDotNet.Models.Booking
         public BookingStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        // 👇 Navigation DTOs
+        // Navigation DTOs
         public HotelDto? Hotel { get; set; }
         public RoomDto? Room { get; set; }
     }

@@ -2,52 +2,89 @@ using JwtAuthDotNet.Services.Interfaces;
 using JwtAuthDotNet.Models.Review;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using JwtAuthDotNet.utils;
 
 namespace JwtAuthDotNet.Controllers;
 
-[AllowAnonymous]
-[Route("api/[controller]")]
+[Route("api/reviews")]
 [ApiController]
 public class ReviewsController(IReviewsService reviewsService) : ControllerBase
 {
+
     [AllowAnonymous]
-    [HttpGet]
-    public async Task<IActionResult> GetReviews()
+    [HttpGet("hotel/{hotelId:Guid}")]
+    public async Task<IActionResult> GetHotelReviews(Guid hotelId)
     {
-        var reviews = await reviewsService.GetReviews();
+        var reviews = await reviewsService.GetHotelReviews(hotelId);
         return Ok(reviews);
     }
 
     [AllowAnonymous]
-    [HttpGet("{id:Guid}")]
-    public async Task<IActionResult> GetReview(Guid id)
+    [HttpGet("{reviewId:Guid}")]
+    public async Task<IActionResult> GetReview(Guid reviewId)
     {
-        var review = await reviewsService.GetReview(id);
+        var review = await reviewsService.GetReview(reviewId);
         if (review is null) return NotFound();
         return Ok(review);
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddReview([FromBody] CreateReviewDto dto)
+    [Authorize]
+    [HttpPost("hotel/{hotelId:Guid}")]
+    public async Task<IActionResult> AddReview(Guid hotelId, [FromBody] CreateReviewDto dto)
     {
-        bool wasSuccessful = await reviewsService.CreateReview(dto);
-        if (!wasSuccessful) return StatusCode(500, "Failed to create review");
-        return Ok();
+        var userId = GetUserIdFromToken.ExtractUserId(HttpContext);
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var (success, message, reviewId) = await reviewsService.CreateReview(dto, userId, hotelId);
+        if (!success)
+        {
+            return BadRequest(message);
+        }
+
+        return Ok(message);
     }
 
-    [HttpPut("{id:Guid}")]
-    public async Task<IActionResult> UpdateReview(Guid id, [FromBody] UpdateReviewDto dto)
+    [Authorize]
+    [HttpPut("{reviewId:Guid}")]
+    public async Task<IActionResult> UpdateReview(Guid reviewId, [FromBody] UpdateReviewDto dto)
     {
-        bool wasSuccessful = await reviewsService.UpdateReview(id, dto);
-        if (!wasSuccessful) return NotFound("Review with this Id was not found.");
-        return Ok();
+        var userId = GetUserIdFromToken.ExtractUserId(HttpContext);
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var (success, message) = await reviewsService.UpdateReview(reviewId, dto, userId);
+
+        if (!success)
+        {
+            return BadRequest(message);
+        }
+
+        return Ok(message);
     }
 
-    [HttpDelete("{id:Guid}")]
-    public async Task<IActionResult> DeleteReview(Guid id)
+    [Authorize]
+    [HttpDelete("{reviewId:Guid}")]
+    public async Task<IActionResult> DeleteReview(Guid reviewId)
     {
-        bool wasSuccessful = await reviewsService.DeleteReview(id);
-        if (!wasSuccessful) return NotFound("Review with this Id was not found.");
-        return Ok();
+        var userId = GetUserIdFromToken.ExtractUserId(HttpContext);
+
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized();
+        }
+
+        var (success, message) = await reviewsService.DeleteReview(reviewId, userId);
+        if (!success)
+        {
+            return BadRequest(message);
+        }
+
+        return Ok(message);
     }
 }
