@@ -37,6 +37,7 @@ namespace JwtAuthDotNet.Services.Implementations
         {
             return new TokenResponseDto()
             {
+                Name = user.Username,
                 AccessToken = CreateToken(user),
                 RefreshToken = await GenerateAndSaveRefreshToken(user),
                 Role = user.Role

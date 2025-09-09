@@ -33,7 +33,7 @@ namespace JwtAuthDotNet.Controllers
             {
                 return BadRequest(new { message = "Wrong username or password" });
             }
-            return Ok(result);
+            return Ok(new { result });
         }
 
         [HttpPost("refresh-token")]
@@ -44,7 +44,7 @@ namespace JwtAuthDotNet.Controllers
             {
                 return BadRequest(new { message = "Invalid client request" });
             }
-            return Ok(result);
+            return Ok(new { result });
         }
 
         [Authorize]
@@ -70,7 +70,7 @@ namespace JwtAuthDotNet.Controllers
             {
                 return BadRequest(new { message = "User already exists" });
             }
-            return Ok(result);
+            return Ok(new { result });
         }
     }
 }
