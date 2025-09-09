@@ -145,7 +145,6 @@ namespace JwtAuthDotNet.Services.Implementations
                         TotalPrice = totalPrice,
                         Description = room.Description,
                         IsAvailable = room.IsAvailable,
-                        Date = room.Date
                     });
                 }
             }

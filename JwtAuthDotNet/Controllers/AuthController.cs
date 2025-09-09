@@ -19,9 +19,9 @@ namespace JwtAuthDotNet.Controllers
             var result = await authService.RegisterAsync(request);
             if (result is null)
             {
-                return BadRequest("User already exists");
+                return BadRequest(new { message="User already exists"});
             }
-            return Ok(result);
+            return Ok(new { result });
         }
 
         [HttpPost("login")]
