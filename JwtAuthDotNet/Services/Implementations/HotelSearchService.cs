@@ -12,7 +12,7 @@ namespace JwtAuthDotNet.Services.Implementations
     public class HotelSearchService(UserDbContext context) : IHotelSearchService
     {
 
-       
+
 
         public async Task<(bool Success, string Message, SearchResultsDto? Results)> SearchHotelsAsync(
             HotelSearchRequest request)
@@ -28,7 +28,7 @@ namespace JwtAuthDotNet.Services.Implementations
 
                 // Normalize dates
                 var checkIn = request.CheckIn.Date;
-                var checkOut = request.CheckOut.Date;
+                var checkOut = request.CheckOut?.Date ?? checkIn.AddDays(1);
                 var nights = (checkOut - checkIn).Days;
 
                 // Build the query
@@ -145,7 +145,6 @@ namespace JwtAuthDotNet.Services.Implementations
                         TotalPrice = totalPrice,
                         Description = room.Description,
                         IsAvailable = room.IsAvailable,
-                        Date = room.Date
                     });
                 }
             }
@@ -185,25 +184,28 @@ namespace JwtAuthDotNet.Services.Implementations
                 result.IsValid = false;
             }
 
-            if (request.CheckOut.Date <= request.CheckIn.Date)
+            if (request.CheckOut.HasValue && request.CheckOut.Value.Date <= request.CheckIn.Date)
             {
                 result.Errors.Add("Check-out date must be after check-in date");
                 result.IsValid = false;
             }
 
             var maxDate = today.AddYears(2);
-            if (request.CheckIn.Date > maxDate || request.CheckOut.Date > maxDate)
+            if (request.CheckIn.Date > maxDate || (request.CheckOut.HasValue && request.CheckOut.Value.Date > maxDate))
             {
                 result.Errors.Add("Search dates cannot be more than 2 years in advance");
                 result.IsValid = false;
             }
 
             var maxStay = 365;
-            var nights = (request.CheckOut.Date - request.CheckIn.Date).Days;
-            if (nights > maxStay)
+            if (request.CheckOut.HasValue)
             {
-                result.Errors.Add($"Maximum stay duration is {maxStay} nights");
-                result.IsValid = false;
+                var nights = (request.CheckOut.Value.Date - request.CheckIn.Date).Days;
+                if (nights > maxStay)
+                {
+                    result.Errors.Add($"Maximum stay duration is {maxStay} nights");
+                    result.IsValid = false;
+                }
             }
 
             if (request.MinPrice.HasValue && request.MaxPrice.HasValue &&
@@ -230,12 +232,12 @@ namespace JwtAuthDotNet.Services.Implementations
 
         // Quick availability check for a specific hotel
         public async Task<(bool Success, List<AvailableRoomDto> AvailableRooms)> CheckHotelAvailabilityAsync(
-            Guid hotelId, DateTime checkIn, DateTime checkOut, int guests = 1)
+            Guid hotelId, DateTime checkIn, DateTime? checkOut, int guests = 1)
         {
             try
             {
                 var checkInDate = checkIn.Date;
-                var checkOutDate = checkOut.Date;
+                var checkOutDate = checkOut?.Date ?? checkInDate.AddDays(1);
                 var nights = (checkOutDate - checkInDate).Days;
 
                 var hotel = await context.Hotels
@@ -250,7 +252,7 @@ namespace JwtAuthDotNet.Services.Implementations
                 {
                     City = hotel.City,
                     CheckIn = checkIn,
-                    CheckOut = checkOut,
+                    CheckOut = checkOut, // checkOut is now nullable, so this assignment is fine
                     Guests = guests
                 };
 
@@ -263,6 +265,5 @@ namespace JwtAuthDotNet.Services.Implementations
                 return (false, new List<AvailableRoomDto>());
             }
         }
-
     }
 }

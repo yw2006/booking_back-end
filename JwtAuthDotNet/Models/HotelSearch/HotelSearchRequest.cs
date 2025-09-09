@@ -12,8 +12,7 @@ namespace JwtAuthDotNet.Models.HotelSearch
         [Required(ErrorMessage = "Check-in date is required")]
         public DateTime CheckIn { get; set; }
 
-        [Required(ErrorMessage = "Check-out date is required")]
-        public DateTime CheckOut { get; set; }
+        public DateTime? CheckOut { get; set; }
 
         [Range(1, 10, ErrorMessage = "Number of guests must be between 1 and 10")]
         public int Guests { get; set; } = 1;

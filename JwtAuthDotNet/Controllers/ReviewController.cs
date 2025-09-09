@@ -8,7 +8,7 @@ namespace JwtAuthDotNet.Controllers;
 
 [Route("api/reviews")]
 [ApiController]
-public class ReviewsController(IReviewsService reviewsService) : ControllerBase
+public class ReviewsController(IReviewService reviewsService) : ControllerBase
 {
 
     [AllowAnonymous]

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthDotNet.Services.Implementations
 {
-    public class ReviewService(UserDbContext context) : IReviewsService
+    public class ReviewService(UserDbContext context) : IReviewService
     {
         public async Task<List<ReviewDto>> GetHotelReviews(Guid hotelId)
         {

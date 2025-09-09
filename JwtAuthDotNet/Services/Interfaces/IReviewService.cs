@@ -2,7 +2,7 @@ using JwtAuthDotNet.Models.Review;
 
 namespace JwtAuthDotNet.Services.Interfaces
 {
-    public interface IReviewsService
+    public interface IReviewService
     {
         Task<List<ReviewDto>> GetHotelReviews(Guid hotelId);
         Task<ReviewDto?> GetReview(Guid id);
