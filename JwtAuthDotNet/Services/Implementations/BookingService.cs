@@ -175,36 +175,7 @@ namespace JwtAuthDotNet.Services.Implementations
             return start1 < end2 && end1 > start2;
         }
 
-        // Method to check room availability without creating booking
-        public async Task<(bool IsAvailable, List<string> ConflictingDates)> CheckRoomAvailabilityAsync(
-            Guid roomId, DateTime checkIn, int nights)
-        {
-            var normalizedCheckIn = checkIn.Date;
-            var checkOut = normalizedCheckIn.AddDays(nights);
-
-            var room = await context.Rooms
-                .Include(r => r.Bookings)
-                .FirstOrDefaultAsync(r => r.Id == roomId);
-
-            if (room == null)
-                return (false, new List<string> { "Room not found" });
-
-            var conflictingBookings = room.Bookings
-                .Where(b => (b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed) &&
-                           IsDateRangeOverlapping(normalizedCheckIn, checkOut, b.CheckIn, b.CheckOut))
-                .ToList();
-
-            if (conflictingBookings.Any())
-            {
-                var conflictingDates = conflictingBookings
-                    .Select(b => $"{b.CheckIn:yyyy-MM-dd} to {b.CheckOut:yyyy-MM-dd}")
-                    .ToList();
-
-                return (false, conflictingDates);
-            }
-
-            return (true, new List<string>());
-        }
+        
 
         public async Task<IEnumerable<BookingDto>> GetBookingsByStatusAsync(string status)
         {
