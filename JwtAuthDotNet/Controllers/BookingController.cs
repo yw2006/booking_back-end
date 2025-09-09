@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-
+using JwtAuthDotNet.utils;
 namespace JwtAuthDotNet.Controllers
 {
     [Route("api")]
@@ -17,7 +17,7 @@ namespace JwtAuthDotNet.Controllers
         public async Task<IActionResult> CreateBooking([FromBody]  CreateBookingDto request)
         {
             // Get user ID from JWT token
-            var userId = GetUserIdFromToken();
+            var userId = GetUserIdFromToken.ExtractUserId(HttpContext);
 
             if (userId == Guid.Empty)
                 return Unauthorized();
@@ -40,6 +40,9 @@ namespace JwtAuthDotNet.Controllers
                 Message = message
             });
         }
+
+      
+
         [Authorize]
         [HttpGet("me/bookings")]
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetMyBookings()
@@ -117,11 +120,7 @@ namespace JwtAuthDotNet.Controllers
 
             return Ok("Booking completed successfully.");
         }
-        private Guid GetUserIdFromToken()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            return Guid.TryParse(userIdClaim, out var userId) ? userId : Guid.Empty;
-        }
+       
     }
 
 }
