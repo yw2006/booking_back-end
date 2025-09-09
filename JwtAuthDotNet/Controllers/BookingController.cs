@@ -47,7 +47,7 @@ namespace JwtAuthDotNet.Controllers
 
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                return Unauthorized("User ID not found in token.");
+                return Unauthorized(new { message = "User ID not found in token." });
             }
 
             var userId = Guid.Parse(userIdClaim);
@@ -64,9 +64,9 @@ namespace JwtAuthDotNet.Controllers
             var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Cancelled);
 
             if (!result)
-                return BadRequest("Failed to cancel booking.");
+                return BadRequest(new { message = "Failed to cancel booking." });
 
-            return Ok("Booking cancelled successfully.");
+            return Ok(new { message = "Booking cancelled successfully." });
         }
 
         [Authorize(Roles = "Admin")]
@@ -84,9 +84,9 @@ namespace JwtAuthDotNet.Controllers
             var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Confirmed);
 
             if (!result)
-                return BadRequest("Failed to confirm booking.");
+                return BadRequest(new { message = "Failed to confirm booking." });
 
-            return Ok("Booking confirmed successfully.");
+            return Ok(new { message = "Booking confirmed successfully." });
         }
 
         [Authorize(Roles = "Admin")]
@@ -98,7 +98,7 @@ namespace JwtAuthDotNet.Controllers
             if (!result)
                 return BadRequest("Failed to reject booking.");
 
-            return Ok("Booking rejected successfully.");
+            return Ok(new { message = "Booking rejected successfully." });
         }
 
         [Authorize(Roles = "Admin")]
@@ -108,9 +108,9 @@ namespace JwtAuthDotNet.Controllers
             var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Completed);
 
             if (!result)
-                return BadRequest("Failed to complete booking.");
+                return BadRequest(new { message = "Failed to complete booking." });
 
-            return Ok("Booking completed successfully.");
+            return Ok(new { message = "Booking completed successfully." });
         }
     }
 }
