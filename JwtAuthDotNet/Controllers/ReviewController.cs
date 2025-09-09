@@ -8,7 +8,7 @@ namespace JwtAuthDotNet.Controllers;
 
 [Route("api/reviews")]
 [ApiController]
-public class ReviewsController(IReviewsService reviewsService) : ControllerBase
+public class ReviewsController(IReviewService reviewsService) : ControllerBase
 {
 
     [AllowAnonymous]
@@ -41,10 +41,10 @@ public class ReviewsController(IReviewsService reviewsService) : ControllerBase
         var (success, message, reviewId) = await reviewsService.CreateReview(dto, userId, hotelId);
         if (!success)
         {
-            return BadRequest(message);
+            return BadRequest(new { message = message });
         }
 
-        return Ok(message);
+        return Ok(new { message = message });
     }
 
     [Authorize]
@@ -62,10 +62,10 @@ public class ReviewsController(IReviewsService reviewsService) : ControllerBase
 
         if (!success)
         {
-            return BadRequest(message);
+            return BadRequest(new { message = message });
         }
 
-        return Ok(message);
+        return Ok(new { message = message });
     }
 
     [Authorize]
@@ -82,9 +82,9 @@ public class ReviewsController(IReviewsService reviewsService) : ControllerBase
         var (success, message) = await reviewsService.DeleteReview(reviewId, userId);
         if (!success)
         {
-            return BadRequest(message);
+            return BadRequest(new { message = message });
         }
 
-        return Ok(message);
+        return Ok(new { message = message });
     }
 }

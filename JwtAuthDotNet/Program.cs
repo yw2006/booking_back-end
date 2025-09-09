@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.FileProviders;
+using JwtAuthDotNet.testing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +37,9 @@ builder.Services.AddDbContext<UserDbContext>(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IHotelService, HotelService>();
 builder.Services.AddScoped<IRoomService, RoomService>();
-builder.Services.AddScoped<IReviewsService, ReviewService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IHotelSearchService, HotelSearchService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -60,6 +62,14 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var hotelService = services.GetRequiredService<IHotelService>();
+    var roomService = services.GetRequiredService<IRoomService>();
+    await DbSeeder.SeedDatabase(hotelService, roomService);
+}
 
 app.UseStaticFiles(new StaticFileOptions
 {

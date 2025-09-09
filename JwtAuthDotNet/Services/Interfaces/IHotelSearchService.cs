@@ -7,7 +7,7 @@ namespace JwtAuthDotNet.Services.Interfaces
         public Task<(bool Success, string Message, SearchResultsDto? Results)> SearchHotelsAsync(
             HotelSearchRequest request);
         public Task<(bool Success, List<AvailableRoomDto> AvailableRooms)> CheckHotelAvailabilityAsync(
-            Guid hotelId, DateTime checkIn, DateTime checkOut, int guests);
+            Guid hotelId, DateTime checkIn, DateTime? checkOut, int guests);
 
     }
 }

@@ -38,7 +38,7 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
 
         if (!wasSuccessful)
         {
-            return StatusCode(500, "Failed to create hotel");
+            return StatusCode(500, new { message = "Failed to create hotel" });
         }
 
         if (dto.Image == null || dto.Image.Length == 0)
@@ -55,7 +55,7 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
         bool wasSuccessful = await hotelService.UpdateHotel(id, dto);
         if (!wasSuccessful)
         {
-            return NotFound("User with this Id was not found.");
+            return NotFound(new { message = "User with this Id was not found." });
         }
 
         return Ok();
@@ -67,7 +67,7 @@ public class HotelsController(IHotelService hotelService) : ControllerBase
         bool wasSuccessful = await hotelService.DeleteHotel(id);
         if (!wasSuccessful)
         {
-            return NotFound("User with this Id was not found.");
+            return NotFound(new { message = "User with this Id was not found." });
         }
 
         return Ok();

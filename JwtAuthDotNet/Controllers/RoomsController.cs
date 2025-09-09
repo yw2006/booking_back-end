@@ -38,7 +38,7 @@ public class RoomsController(IRoomService roomService) : ControllerBase
 
         if (!wasSuccessful)
         {
-            return StatusCode(500, "Failed to create room");
+            return StatusCode(500, new { message = "Failed to create hotel" });
         }
 
         return Ok();
@@ -50,7 +50,7 @@ public class RoomsController(IRoomService roomService) : ControllerBase
         bool wasSuccessful = await roomService.UpdateRoom(id, dto);
         if (!wasSuccessful)
         {
-            return NotFound("Room with this Id was not found.");
+            return NotFound(new { message = "Room with this Id was not found." });
         }
 
         return Ok();
@@ -62,7 +62,7 @@ public class RoomsController(IRoomService roomService) : ControllerBase
         bool wasSuccessful = await roomService.DeleteRoom(id);
         if (!wasSuccessful)
         {
-            return NotFound("Room with this Id was not found.");
+            return NotFound(new { message = "Room with this Id was not found." });
         }
 
         return Ok();

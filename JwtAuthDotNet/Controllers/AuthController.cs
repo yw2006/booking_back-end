@@ -19,7 +19,7 @@ namespace JwtAuthDotNet.Controllers
             var result = await authService.RegisterAsync(request);
             if (result is null)
             {
-                return BadRequest(new { message="User already exists"});
+                return BadRequest(new { message = "User already exists" });
             }
             return Ok(new { result });
         }
@@ -30,7 +30,7 @@ namespace JwtAuthDotNet.Controllers
             var result = await authService.LoginAsync(request);
             if (result is null)
             {
-                return BadRequest("Wrong username or password");
+                return BadRequest(new { message = "Wrong username or password" });
             }
             return Ok(result);
         }
@@ -41,7 +41,7 @@ namespace JwtAuthDotNet.Controllers
             var result = await authService.RefreshTokenAsync(request);
             if (result is null || result.RefreshToken is null || result.AccessToken is null)
             {
-                return BadRequest("Invalid client request");
+                return BadRequest(new { message = "Invalid client request" });
             }
             return Ok(result);
         }
@@ -67,7 +67,7 @@ namespace JwtAuthDotNet.Controllers
             bool result = await authService.CreateAdmin(request);
             if (!result)
             {
-                return BadRequest("User already exists");
+                return BadRequest(new { message = "User already exists" });
             }
             return Ok(result);
         }
