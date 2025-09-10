@@ -54,7 +54,7 @@ namespace JwtAuthDotNet.Controllers
 
             var bookings = await bookingService.GetUserBookingsAsync(userId);
 
-            return Ok(bookings);
+            return Ok(new { message = bookings });
         }
 
         [Authorize]
@@ -74,7 +74,7 @@ namespace JwtAuthDotNet.Controllers
         public async Task<ActionResult<IEnumerable<BookingDto>>> GetPendingBookings([FromQuery] string status = "PENDING")
         {
             var bookings = await bookingService.GetBookingsByStatusAsync(status);
-            return Ok(bookings);
+            return Ok(new { message = bookings });
         }
 
         [Authorize(Roles = "Admin")]
@@ -96,7 +96,7 @@ namespace JwtAuthDotNet.Controllers
             var result = await bookingService.UpdateBookingStatusAsync(bookingid, BookingStatus.Rejected);
 
             if (!result)
-                return BadRequest("Failed to reject booking.");
+                return BadRequest(new { message = "Failed to reject booking." });
 
             return Ok(new { message = "Booking rejected successfully." });
         }
