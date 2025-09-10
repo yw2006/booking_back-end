@@ -1,4 +1,4 @@
-using JwtAuthDotNet.Data;
+﻿using JwtAuthDotNet.Data;
 using JwtAuthDotNet.Services.Interfaces;
 using JwtAuthDotNet.Services.Implementations;
 using JwtAuthDotNet.Controllers;
@@ -10,30 +10,14 @@ using Microsoft.Extensions.FileProviders;
 using JwtAuthDotNet.testing;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
-
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddPolicy("AllowAll", policy =>
     {
-        policy.WithOrigins(allowedOrigins)  // use values from appsettings.json
+        policy.AllowAnyOrigin()   // ✅ allow all origins
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
-});
-// Add services to the container.
-
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            policy
-                .WithOrigins("http://localhost:8080") // your frontend dev server
-                .AllowAnyHeader()
-                .AllowAnyMethod();
-        });
 });
 builder.Services.AddControllers();
 builder.Services.AddHttpContextAccessor();
@@ -72,15 +56,14 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
-
-app.UseCors("AllowFrontend");
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var hotelService = services.GetRequiredService<IHotelService>();
-    var roomService = services.GetRequiredService<IRoomService>();
-    await DbSeeder.SeedDatabase(hotelService, roomService);
-}
+app.UseCors("AllowAll"); // ✅ apply CORS globally
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var hotelService = services.GetRequiredService<IHotelService>();
+//    var roomService = services.GetRequiredService<IRoomService>();
+//    await DbSeeder.SeedDatabase(hotelService, roomService);
+//}
 
 app.UseStaticFiles(new StaticFileOptions
 {
