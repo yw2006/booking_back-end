@@ -1,6 +1,7 @@
 ﻿using JwtAuthDotNet.Enums;
 using JwtAuthDotNet.Models.Hotel;
 using JwtAuthDotNet.Models.Room;
+using JwtAuthDotNet.Models.User;
 
 namespace JwtAuthDotNet.Models.Booking
 {
@@ -17,8 +18,8 @@ namespace JwtAuthDotNet.Models.Booking
         public BookingStatus Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
-        // Navigation DTOs
         public HotelDto? Hotel { get; set; }
         public RoomDto? Room { get; set; }
+        public UserDto? User { get; set; }
     }
 }

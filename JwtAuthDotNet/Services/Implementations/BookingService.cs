@@ -4,6 +4,7 @@ using JwtAuthDotNet.Enums;
 using JwtAuthDotNet.Models.Booking;
 using JwtAuthDotNet.Models.Hotel;
 using JwtAuthDotNet.Models.Room;
+using JwtAuthDotNet.Models.User;
 using JwtAuthDotNet.Services.Interfaces;
 using JwtAuthDotNet.Validation;
 using Microsoft.EntityFrameworkCore;
@@ -179,6 +180,51 @@ namespace JwtAuthDotNet.Services.Implementations
 
         public async Task<IEnumerable<BookingDto>> GetBookingsByStatusAsync(string status)
         {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                return await context.Bookings
+                    .Include(b => b.Room).ThenInclude(r => r.Hotel)
+                    .Include(b => b.User) // ✅ to fetch User for UserDto
+                    .Select(b => new BookingDto
+                    {
+                        Id = b.Id,
+                        UserId = b.UserId,
+                        HotelId = b.Room.HotelId,
+                        RoomId = b.Room.Id,
+                        CheckIn = b.CheckIn,
+                        CheckOut = b.CheckOut,
+                        Nights = b.Nights,
+                        TotalPrice = b.Room.BasePrice * b.Nights,
+                        Status = b.Status,
+                        CreatedAt = b.CreatedAt,
+                        Hotel = new HotelDto
+                        {
+                            Id = b.Room.Hotel.Id,
+                            Name = b.Room.Hotel.Name,
+                            Address = b.Room.Hotel.Address,
+                            City = b.Room.Hotel.City,
+                            ThumbnailUrl = b.Room.Hotel.ThumbnailUrl,
+                            Description = b.Room.Hotel.Description,
+                            CreatedAt = b.Room.Hotel.CreatedAt
+                        },
+                        Room = new RoomDto
+                        {
+                            Id = b.Room.Id,
+                            HotelId = b.Room.HotelId,
+                            Name = b.Room.Name,
+                            Description = b.Room.Description,
+                            BasePrice = b.Room.BasePrice
+                        },
+                        User = new UserDto
+                        {
+                            Username = b.User.Username,
+                            Email = b.User.Email,
+                            Phone = b.User.Phone
+                        }
+                    })
+                    .ToListAsync();
+            }
+
             if (!Enum.TryParse<BookingStatus>(status, true, out var parsedStatus))
                 return Enumerable.Empty<BookingDto>();
 
@@ -213,6 +259,12 @@ namespace JwtAuthDotNet.Services.Implementations
                         Name = b.Room.Name,
                         Description = b.Room.Description,
                         BasePrice = b.Room.BasePrice,
+                    },
+                    User = new UserDto
+                    {
+                        Username = b.User.Username,
+                        Email = b.User.Email,
+                        Phone = b.User.Phone,
                     }
                 })
                 .ToListAsync();
@@ -220,6 +272,7 @@ namespace JwtAuthDotNet.Services.Implementations
 
         public async Task<IEnumerable<BookingDto>> GetUserBookingsAsync(Guid userId)
         {
+
             return await context.Bookings.Where(b => b.UserId == userId).Include(b => b.Room)
                 .Select(b => new BookingDto
                 {
@@ -250,7 +303,14 @@ namespace JwtAuthDotNet.Services.Implementations
                         Name = b.Room.Name,
                         Description = b.Room.Description,
                         BasePrice = b.Room.BasePrice,
+                    },
+                    User = new UserDto
+                    {
+                        Username = b.User.Username,
+                        Email = b.User.Email,
+                        Phone = b.User.Phone,
                     }
+
                 }).ToListAsync();
         }
 
@@ -258,7 +318,6 @@ namespace JwtAuthDotNet.Services.Implementations
         {
             var booking = await context.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId);
             if (booking == null) return false;
-
 
             switch (booking.Status)
             {

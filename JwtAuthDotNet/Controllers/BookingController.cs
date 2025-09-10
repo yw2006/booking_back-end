@@ -54,7 +54,7 @@ namespace JwtAuthDotNet.Controllers
 
             var bookings = await bookingService.GetUserBookingsAsync(userId);
 
-            return Ok(new { message = bookings });
+            return Ok(bookings); //returns an array
         }
 
         [Authorize]
@@ -71,10 +71,10 @@ namespace JwtAuthDotNet.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("admin/bookings")]
-        public async Task<ActionResult<IEnumerable<BookingDto>>> GetPendingBookings([FromQuery] string status = "PENDING")
+        public async Task<ActionResult<IEnumerable<BookingDto>>> GetPendingBookings([FromQuery] string? status)
         {
             var bookings = await bookingService.GetBookingsByStatusAsync(status);
-            return Ok(new { message = bookings });
+            return Ok(bookings); //returns an array
         }
 
         [Authorize(Roles = "Admin")]

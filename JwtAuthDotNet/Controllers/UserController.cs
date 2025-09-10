@@ -9,13 +9,21 @@ namespace JwtAuthDotNet.Controllers;
 public class UserController(UserDbContext context) : ControllerBase
 {
     [Authorize(Roles = "Admin")]
-    [HttpGet("allusers")]
-    public IActionResult GetAllUsers()
+    [HttpGet("alladmins")]
+    public IActionResult GetAllAdmins()
     {
-        var users = context.Users;
+        var users = context.Users.Where(u => u.Role.Equals("Admin"));
 
         return Ok(users);
 
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpGet("usercount")]
+    public IActionResult GetUserCount()
+    {
+        int userCount = context.Users.Count(u => u.Role != "Admin");
+        return Ok(new { count = userCount });
     }
 }
 
